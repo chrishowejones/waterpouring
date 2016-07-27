@@ -6,9 +6,9 @@ The water pouring problem is:
 
 Given a number of glasses of different capacities and the moves:
 
-Fill - fill a glass to capacity
-Empty - empty a glass completely
-Pour - pour from one glass to another without spilling potentially
+    * Fill - fill a glass to capacity
+    * Empty - empty a glass completely
+    * Pour - pour from one glass to another without spilling potentially
        leaving any water that can't be contained in one glass in the
        other.
 
