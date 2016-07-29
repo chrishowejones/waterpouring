@@ -1,26 +1,33 @@
 (ns waterpouring.maps
-  (:require [waterpouring.core :refer [glasses]]))
+  (:require [waterpouring.core :refer [glasses initialise-state]]))
 
 (defmulti state->state
   (fn [state move] (when move (:move move))))
 
 (defmethod state->state
   :empty
-  [state {:keys [glass]}] (assoc-in state [glass :vol] 0))
+  [state {:keys [glass]}] (if (< glass (count state))
+                            (assoc-in state [glass :vol] 0)
+                            state))
 
 (defmethod state->state
   :fill
-  [state {:keys [glass]}] (update state glass #(assoc % :vol (:capacity %))))
+  [state {:keys [glass]}] (if (< glass (count state))
+                            (update state glass #(assoc % :vol (:capacity %)))
+                            state))
 
 (defmethod state->state
   :pour
   [state {:keys [from to]}]
-  (let [change-vol (min (get-in state [from :vol])
-                        (- (get-in state [to :capacity])
-                           (get-in state [to :vol])))]
-    (-> state
-        (update-in [to :vol] + change-vol)
-        (update-in [from :vol] - change-vol))))
+  (if (and (< from (count state))
+           (< to (count state)))
+   (let [change-vol (min (get-in state [from :vol])
+                         (- (get-in state [to :capacity])
+                            (get-in state [to :vol])))]
+     (-> state
+         (update-in [to :vol] + change-vol)
+         (update-in [from :vol] - change-vol)))
+   state))
 
 (defmethod state->state
   :default
@@ -50,7 +57,7 @@
   (let [generate-paths (generate-paths-fn capacity)]
     (iterate generate-paths initial-paths)))
 
-(defn- has-target-vol?
+(defn has-target-vol?
   [target initial-state]
   (fn [path]
     (some (partial = target) (map :vol (endstate path initial-state)))))
